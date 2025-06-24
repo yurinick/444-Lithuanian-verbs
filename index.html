@@ -34,6 +34,15 @@
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 antialiased">
 
+<!-- ======== БЛОК ДЛЯ ОГРАНИЧЕНИЯ ДОСТУПА (НОВЫЙ) ======== -->
+<div id="access-denied" class="hidden fixed inset-0 bg-gray-100 dark:bg-gray-900 flex items-center justify-center z-50 text-center p-4">
+    <div>
+        <p class="text-2xl font-bold text-red-600 dark:text-red-500">Access Denied</p>
+        <p class="mt-2 text-gray-600 dark:text-gray-400">You do not have permission to use this application.</p>
+    </div>
+</div>
+
+<div id="main-content" class="mx-auto max-w-5xl">
 <div id="main-content" class="mx-auto max-w-5xl">
   <!-- ======== ШАПКА И ПОИСК (теперь они фиксированные) ======== -->
   <header class="p-4 bg-gray-100 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
@@ -88,6 +97,15 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+
+// ======== КОД ПРОВЕРКИ ДОСТУПА (НОВЫЙ) ========
+const ALLOWED_USER_IDS = [591135240];
+
+  try {
+    const tg = window.Telegram.WebApp;
+    // Данные о пользователе. Мы используем `initDataUnsafe`, т.к. не делаем криптографическую проверку,
+    // что для простого ограничения доступа абсолютно нормально.
+    const currentUser = tg.initDataUnsafe?.user;
 
   // === ВСТРОЕННЫЕ ДАННЫЕ (ПРЕСЕТЫ) ===
   const PRESETS = {
