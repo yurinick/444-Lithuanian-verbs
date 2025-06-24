@@ -98,14 +98,59 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
-// ======== КОД ПРОВЕРКИ ДОСТУПА (НОВЫЙ) ========
+// ======== КОД ПРОВЕРКИ ДОСТУПА ========
+
+// 1. Создаем "белый список" ID, которым разрешен доступ.
 const ALLOWED_USER_IDS = [591135240];
 
-  try {
-    const tg = window.Telegram.WebApp;
-    // Данные о пользователе. Мы используем `initDataUnsafe`, т.к. не делаем криптографическую проверку,
-    // что для простого ограничения доступа абсолютно нормально.
-    const currentUser = tg.initDataUnsafe?.user;
+try {
+  const tg = window.Telegram.WebApp;
+  const currentUser = tg.initDataUnsafe?.user;
+
+  // 2. ПРОВЕРКА ДОСТУПА
+  // Если приложение открыто в Telegram И ID пользователя НЕ в списке разрешенных...
+  if (currentUser && !ALLOWED_USER_IDS.includes(currentUser.id)) {
+    // ...тогда показываем блок "Доступ запрещен" и останавливаем выполнение скрипта.
+    document.getElementById('main-content').style.display = 'none'; // Скрываем основное приложение
+    document.getElementById('access-denied').classList.remove('hidden'); // Показываем ошибку
+    
+    // Также можно уведомить Telegram, что приложение готово, чтобы оно не "зависло"
+    tg.ready(); 
+    
+    // ВАЖНО: Ничего больше не делаем, если доступ запрещен.
+    // Оставляем пустой блок try, чтобы не было ошибок.
+
+  } else {
+    // 3. ЕСЛИ ДОСТУП РАЗРЕШЕН (или мы не в Telegram) - ЗАПУСКАЕМ ПРИЛОЖЕНИЕ
+    // Этот код у вас уже был, он просто "переезжает" в блок else.
+
+    tg.ready(); // Сообщаем, что приложение готово
+
+    // Настраиваем тему
+    const applyTheme = () => {
+        document.body.classList.toggle('dark', tg.colorScheme === 'dark');
+    };
+    tg.onEvent('themeChanged', applyTheme);
+    applyTheme(); // Применяем тему сразу
+
+    // Настраиваем главную кнопку Telegram
+    tg.MainButton.setText('Закрыть');
+    tg.MainButton.setTextColor('#ffffff');
+    tg.MainButton.setColor('#0ea5e9');
+    tg.MainButton.show();
+
+    // Добавляем действие на клик по этой кнопке
+    tg.onEvent('mainButtonClicked', function() {
+        tg.close();
+    });
+  }
+  
+} catch (e) {
+  // Если приложение открыто в обычном браузере, а не в Telegram,
+  // просто игнорируем ошибку и позволяем ему работать как обычно.
+  console.log("Not in Telegram environment or access check skipped.");
+}
+  // ======== КОНЕЦ КОДА ПРОВЕРКИ ДОСТУПА ========
 
   // === ВСТРОЕННЫЕ ДАННЫЕ (ПРЕСЕТЫ) ===
   const PRESETS = {
